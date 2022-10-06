@@ -1,9 +1,12 @@
 <script lang="ts">
 
-  import { text } from 'svelte/internal';
-import {ChooseRepository,GetSnapshots} from '../wailsjs/go/main/App.js'
+  import { onMount, text } from 'svelte/internal';
+import {CmdCheck, ChooseRepository,GetSnapshots} from '../wailsjs/go/main/App.js'
 
-  let selected_repository: string = ""
+
+let cmd_ready : boolean = false;
+let selected_repository: string = ""
+
   let name: string
   let repo_password: string
   let text_result: string = ""
@@ -20,6 +23,14 @@ import {ChooseRepository,GetSnapshots} from '../wailsjs/go/main/App.js'
       text_result = r+ onceki}
       )
   }
+
+  onMount(()=>{
+    CmdCheck().then(r=>JSON.parse(r)).then(r=>{
+      if("data" in r){
+        cmd_ready = r.data== "1" ? true : false ; 
+      }       
+    })
+  })
 
 </script>
 

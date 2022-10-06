@@ -6,10 +6,10 @@ export function ChooseRepository() {
   return window['go']['main']['App']['ChooseRepository']();
 }
 
-export function GetSnapshots(arg1) {
-  return window['go']['main']['App']['GetSnapshots'](arg1);
+export function CmdCheck() {
+  return window['go']['main']['App']['CmdCheck']();
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
+export function GetSnapshots(arg1) {
+  return window['go']['main']['App']['GetSnapshots'](arg1);
 }

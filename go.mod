@@ -1,6 +1,6 @@
-module changeme
+module restic_wui
 
-go 1.18
+go 1.19
 
 require github.com/wailsapp/wails/v2 v2.0.0
 
