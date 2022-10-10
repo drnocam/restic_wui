@@ -13,3 +13,7 @@ export function CmdCheck() {
 export function GetSnapshots(arg1) {
   return window['go']['main']['App']['GetSnapshots'](arg1);
 }
+
+export function ReadWriteSettings() {
+  return window['go']['main']['App']['ReadWriteSettings']();
+}

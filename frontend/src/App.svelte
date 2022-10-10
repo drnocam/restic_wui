@@ -1,7 +1,7 @@
 <script lang="ts">
 
   import { onMount, text } from 'svelte/internal';
-import {CmdCheck, ChooseRepository,GetSnapshots} from '../wailsjs/go/main/App.js'
+import {CmdCheck, ChooseRepository,GetSnapshots, ReadWriteSettings} from '../wailsjs/go/main/App.js'
 
 
 let cmd_ready : boolean = false;
@@ -24,6 +24,14 @@ let selected_repository: string = ""
       )
   }
 
+function read_write_settings() : void {
+
+  ReadWriteSettings().then(r=>{
+    console.log(r)
+  })
+
+}
+
   onMount(()=>{
     CmdCheck().then(r=>JSON.parse(r)).then(r=>{
       if("data" in r){
@@ -35,6 +43,9 @@ let selected_repository: string = ""
 </script>
 
 <main>
+  <button class="btn" on:click={read_write_settings}>Read Write Settings</button>
+
+  <div></div>
     <input type="password" placeholder="Write Repository Password" bind:value={repo_password} />
     <button class="btn" on:click={choose_repository}>Choose Repository</button>
     <div class="result" id="result">{selected_repository}</div>

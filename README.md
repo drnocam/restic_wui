@@ -1,5 +1,6 @@
 # README
 
+Its very early stage. Don't use it.
 ## About
 
 This is the official Wails Svelte-TS template.

@@ -2,18 +2,23 @@ package fileop
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"os"
 )
 
-func WriteSettings(){
+func WriteSettings(data []byte) error {
 
-	file, _ := json.MarshalIndent(data, "", " ")
- 
-	_ = ioutil.WriteFile("test.json", file, 0644)
-	return "dfas";
+	file, _ := json.MarshalIndent(string(data), "", " ")
+
+	err := os.WriteFile("test.json", file, 0644)
+	fmt.Println("Dosya yazildi")
+	return err
 }
 
-func ReadSettings() {
+func ReadSettings() error {
 
-	return "dfas";
+	if data, err := os.ReadFile("test.json"); err == nil {
+		fmt.Print(string(data))
+	}
+	return nil
 }

@@ -1,27 +1,32 @@
 package main
 
-var settings Settings;
+var settings Settings
 
 type Repository struct {
-	Path string
-	Password string
-	index int
+	Path     string `json: "path"`
+	Password string `json: "password"`
+	index    int    `json: "index"`
 }
 
+/*
+* default runcommand restic
+ */
 type Settings struct {
-	Repositories []Repository
+	RunCommand   string       `json: "runcmd`
+	Repositories []Repository `json: "repos`
 }
 
 func GetSettings() Settings {
 
 	settings = Settings{
+		RunCommand: "restic",
 		Repositories: []Repository{
-			Repository{
-				Path: "/home/cam/public_html/backup",
-				Password : "1",
-				index : 1,
+			{
+				Path:     "/home/cam/public_html/backup",
+				Password: "1",
+				index:    1,
 			},
 		},
 	}
-	return settings;
+	return settings
 }

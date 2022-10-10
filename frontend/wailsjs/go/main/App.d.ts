@@ -6,3 +6,5 @@ export function ChooseRepository():Promise<string>;
 export function CmdCheck():Promise<string>;
 
 export function GetSnapshots(arg1:string):Promise<string>;
+
+export function ReadWriteSettings():Promise<void>;
