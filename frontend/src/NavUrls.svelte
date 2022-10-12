@@ -9,12 +9,6 @@ import Index from './page/Index.svelte';
     /* your styles go here */
 </style>
 <Router >
-    <nav>
-      <Link to="/">Home</Link>
-      <Link to="settings">Settings</Link>
-    </nav>
-    <div>
      <Route path="/"><Index /></Route>
      <Route path="settings"><Settings /></Route>
-    </div>
   </Router>

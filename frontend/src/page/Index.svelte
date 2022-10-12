@@ -54,4 +54,4 @@ function read_write_settings() : void {
     {:else}
     <div>Please write password first to get snapshots.</div>
     {/if}
-    <div style="background-color: white;min-height:200px;color:black">{text_result}</div>
+    <div style="min-height:200px;color:black">{text_result}</div>

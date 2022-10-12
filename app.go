@@ -54,7 +54,10 @@ func (a *App) ChooseRepository() string {
 
 	}
 	selected_repository = selection
-	return fmt.Sprintf("Repository %s", selection)
+
+	size, _ := fileop.DirSize(selected_repository)
+
+	return fmt.Sprintf("Repository %s , Size: %s", selection, size)
 }
 
 func (a *App) GetSnapshots(password string) string {
