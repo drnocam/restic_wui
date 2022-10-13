@@ -1,9 +1,19 @@
 <script type="ts">
     import { dark_mode } from "/src/store";
     import { Router,Link } from "svelte-routing";
+    import {
+    Button,
+    ButtonGroup,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader
+  } from 'sveltestrap';
 
     let mode = 'lightbulb-off-fill';
     let dark = 'light';
+    let settings_modal = false;
+    let repo_add_modal = false;
 
     dark_mode.subscribe(m=>{
     if(m==0) {
@@ -27,23 +37,47 @@
         }
     }
     
+    const settings_toggle = ()=>{
+      settings_modal = !settings_modal;
+    }
+
+    const repo_toggle = ()=>{
+      repo_add_modal = !repo_add_modal;
+    }
 
 </script>
 <Router>
 <nav class="navbar navbar-expand-lg bg-{dark}">
     <div class="container-fluid">
-      <div class="navbar-brand"><Link to="/">Restic Comman Line Parser UI</Link></div>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"> </li>
-        </ul> 
-
-        <div class="btn btn-{dark}" title="Settings"><Link to="/settings"><i class="bi-gear"></i></Link></div>
-        <div class="btn btn-{dark}" title="Dark/Light Mode" on:click={change_mode}><i class="bi-{mode}"></i></div>
+      <div class="navbar-brand"><Link to="/">Restic Command Line Parser UI</Link></div>
+<div>
+      <div class="btn btn-{dark}" title="Settings" on:click={settings_toggle}><i class="bi-gear"></i></div>
+        <div class="btn btn-{dark}" title="Dark/Light Mode"  on:click={change_mode}><i class="bi-{mode}"></i></div>
       </div>
     </div>
   </nav>
 </Router>
+<Modal isOpen={settings_modal} {settings_toggle} fullscreen>
+  <ModalHeader {settings_toggle}>Modal title</ModalHeader>
+  <ModalBody>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua.
+    <div class="btn btn-{dark}"  on:click={repo_toggle}>asdfasdfas</div>
+
+  </ModalBody>
+  <ModalFooter>
+    <Button color="primary" on:click={settings_toggle}>Do Something</Button>
+    <Button color="secondary" on:click={settings_toggle}>Cancel</Button>
+  </ModalFooter>
+</Modal>
+<Modal isOpen={repo_add_modal} {repo_toggle} fullscreen>
+  <ModalHeader {repo_toggle}>Modal title</ModalHeader>
+  <ModalBody>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua.
+  </ModalBody>
+  <ModalFooter>
+    <Button color="primary" on:click={repo_toggle}>Do Something</Button>
+    <Button color="secondary" on:click={repo_toggle}>Cancel</Button>
+  </ModalFooter>
+</Modal>

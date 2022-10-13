@@ -62,7 +62,7 @@ func (a *App) ChooseRepository() string {
 
 func (a *App) GetSnapshots(password string) string {
 
-	cmd := exec.Command("restic", "-r", selected_repository, "snapshots")
+	cmd := exec.Command("restic", "-r", selected_repository, "snapshots", "--json")
 
 	newEnv := append(os.Environ(), "RESTIC_PASSWORD="+password)
 	cmd.Env = newEnv
@@ -70,6 +70,7 @@ func (a *App) GetSnapshots(password string) string {
 	if err != nil {
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 	}
+
 	return fmt.Sprintf("%s\n", string(out))
 
 }

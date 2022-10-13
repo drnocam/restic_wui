@@ -20,6 +20,7 @@
     "vite": "^3.0.0"
   },
   "dependencies": {
-    "svelte-routing": "^1.6.0"
+    "svelte-routing": "^1.6.0",
+    "sveltestrap": "^5.9.0"
   }
 }
