@@ -19,7 +19,7 @@
     if(m==0) {
         dark = 'light'
         mode = 'lightbulb'
-        document.getElementsByTagName("body")[0].style = 'background:white;color:var(--bs-light)';
+        document.getElementsByTagName("body")[0].style = 'background:white;color:var(--bs-dark)';
     } else {
         dark = 'dark';
         mode = 'lightbulb-off-fill'

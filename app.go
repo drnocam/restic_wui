@@ -56,8 +56,9 @@ func (a *App) ChooseRepository() string {
 	selected_repository = selection
 
 	size, _ := fileop.DirSize(selected_repository)
+	fmt.Printf("Repository %s , Size: %d", selection, size)
 
-	return fmt.Sprintf("Repository %s , Size: %s", selection, size)
+	return fmt.Sprint(selection)
 }
 
 func (a *App) GetSnapshots(password string) string {
@@ -84,5 +85,31 @@ func (a *App) ReadWriteSettings() {
 	fileop.ReadSettings()
 
 	fmt.Printf("Dosya yazıldı.")
+
+}
+
+func (a *App) AddUpdateRepository(id int, infos string) string {
+
+	if id == 0 {
+		/*  new record */
+		new_repo := SavedRepository{}
+		err := json.Unmarshal([]byte(infos), &new_repo)
+		if err == nil {
+			/*
+				TODOS: get last id
+			*/
+
+			new_repo.id = 5
+			if data, e := json.Marshal(new_repo); e == nil {
+				fileop.WriteSettings(data)
+				return JsonReturn(Message{Message: "New Repository Saved Succesfully", Type: 1}, infos)
+			} else {
+				return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
+			}
+
+		}
+		fmt.Printf(err.Error())
+	}
+	return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
 
 }

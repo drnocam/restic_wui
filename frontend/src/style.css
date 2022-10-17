@@ -13,7 +13,7 @@ body {
 }
 @media (prefers-color-scheme: dark) {
     body {
-background-color: var(--bs-dark);
-color: var(--bs-light);
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
 }
 }

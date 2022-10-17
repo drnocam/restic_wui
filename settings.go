@@ -2,29 +2,49 @@ package main
 
 var settings Settings
 
-type Repository struct {
+/*
+* snapshots repo infos.
+ */
+type RepositoryInfo struct {
+	time     string   `json: "time"`
+	paths    []string `json: "paths"`
+	tags     []string `json: "tags"`
+	hostname string   `json: "hostname"`
+	username string   `json: "username"`
+	short_id string   `json: "short_id"`
+	id       string   `json: "id"`
+}
+
+/*
+* id to update uniqe
+ */
+type SavedRepository struct {
 	Path     string `json: "path"`
 	Password string `json: "password"`
-	index    int    `json: "index"`
+	name     string `json: "name"`
+	size     int    `json: "size"`
+	id       int    `json: "id"`
 }
 
 /*
 * default runcommand restic
  */
 type Settings struct {
-	RunCommand   string       `json: "runcmd`
-	Repositories []Repository `json: "repos`
+	RunCommand   string            `json: "runcmd`
+	Repositories []SavedRepository `json: "repos`
 }
 
 func GetSettings() Settings {
 
 	settings = Settings{
 		RunCommand: "restic",
-		Repositories: []Repository{
+		Repositories: []SavedRepository{
 			{
 				Path:     "/home/cam/public_html/backup",
 				Password: "1",
-				index:    1,
+				name:     "www",
+				size:     0,
+				id:       1,
 			},
 		},
 	}
