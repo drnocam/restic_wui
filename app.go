@@ -99,7 +99,7 @@ func (a *App) AddUpdateRepository(id int, infos string) string {
 				TODOS: get last id
 			*/
 
-			new_repo.id = 5
+			new_repo.Id = 5
 			if data, e := json.Marshal(new_repo); e == nil {
 				fileop.WriteSettings(data)
 				return JsonReturn(Message{Message: "New Repository Saved Succesfully", Type: 1}, infos)
