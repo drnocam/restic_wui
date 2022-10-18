@@ -22,6 +22,7 @@ type SavedRepository struct {
 	Path     string `json: "path"`
 	Password string `json: "password"`
 	name     string `json: "name"`
+	args     string `json: "args"`
 	size     int    `json: "size"`
 	id       int    `json: "id"`
 }
