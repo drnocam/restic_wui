@@ -78,13 +78,7 @@ func (a *App) GetSnapshots(password string) string {
 
 func (a *App) ReadWriteSettings() {
 
-	if data, err := json.Marshal(GetSettings()); err == nil {
-		fileop.WriteSettings(data)
-	}
-
-	fileop.ReadSettings()
-
-	fmt.Printf("Dosya yazıldı.")
+	GetSettings()
 
 }
 
@@ -95,15 +89,16 @@ func (a *App) AddUpdateRepository(id int, infos string) string {
 		new_repo := SavedRepository{}
 		err := json.Unmarshal([]byte(infos), &new_repo)
 		if err == nil {
-			/*
-				TODOS: get last id
-			*/
 
-			new_repo.Id = 5
-			if data, e := json.Marshal(new_repo); e == nil {
-				fileop.WriteSettings(data)
-				return JsonReturn(Message{Message: "New Repository Saved Succesfully", Type: 1}, infos)
+			settings.AddRepository(new_repo)
+			/*
+				to see what is added
+			*/
+			if s, ok := json.Marshal(settings); ok == nil {
+
+				return JsonReturn(Message{Message: "New Repository Saved Succesfully", Type: 1}, string(s))
 			} else {
+
 				return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
 			}
 

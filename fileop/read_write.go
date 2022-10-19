@@ -3,11 +3,13 @@ package fileop
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"errors"
 
 	"encoding/base64"
-	"fmt"
 	"os"
 )
+
+const file_name = "test.json"
 
 const secret_word string = "agsdfgs4345dsf*/"
 
@@ -52,21 +54,20 @@ func WriteSettings(data []byte) error {
 	enc, er := Encrypt(data, secret_word)
 	if er == nil {
 
-		err := os.WriteFile("test.json", []byte(enc), 0644)
-		fmt.Println("Dosya yazildi", enc, "fadsf")
+		err := os.WriteFile(file_name, []byte(enc), 0644)
 		return err
 	}
 	return nil
 }
 
-func ReadSettings() error {
+func ReadSettings() (string, error) {
 
-	if data, err := os.ReadFile("test.json"); err == nil {
+	if data, err := os.ReadFile(file_name); err == nil {
 
 		if datax, errx := Decrypt(data, secret_word); errx == nil {
-			fmt.Print("Reading", datax)
+			return datax, nil
 		}
-		return nil
+		return "", errors.New("File couldnt decrypt.")
 	}
-	return nil
+	return "", errors.New("File couldnt read.")
 }

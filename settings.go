@@ -1,5 +1,11 @@
 package main
 
+import (
+	"encoding/json"
+	"fmt"
+	"restic_wui/fileop"
+)
+
 var settings Settings
 
 /*
@@ -35,19 +41,20 @@ type Settings struct {
 	Repositories []SavedRepository `json: "repos`
 }
 
+/*
+* returns default settings if file not read
+ */
 func GetSettings() Settings {
 
-	settings = Settings{
-		RunCommand: "restic",
-		Repositories: []SavedRepository{
-			{
-				Path:     "/home/cam/public_html/backup",
-				Password: "1",
-				Name:     "www",
-				Size:     0,
-				Id:       1,
-			},
-		},
+	if v, ok := fileop.ReadSettings(); ok == nil {
+		json.Unmarshal([]byte(v), &settings)
+		if settings.RunCommand == "" {
+			settings.RunCommand = "restic"
+		}
+		fmt.Println("getted settings:", settings)
+
+	} else {
+		fmt.Println(ok.Error())
 	}
 	return settings
 }
@@ -68,17 +75,43 @@ func (s Settings) FindIndexById(id int) int {
 	}
 	return -1
 }
+
+/*
+find max id and add
+*/
 func (s *Settings) AddRepository(repo SavedRepository) {
-	/*
-		find max id and add
-	*/
+
 	repo.Id = s.FindMaxId() + 1
 	s.Repositories = append(s.Repositories, repo)
+	if s, ok := json.Marshal(settings); ok == nil {
+		fileop.WriteSettings(s)
+	}
 }
+
+/*
+find index and change value
+*/
 func (s *Settings) UpdateRepository(id int, repo SavedRepository) {
-	/*
-		find max id and add
-	*/
-	repo.Id = s.FindMaxId() + 1
-	s.Repositories = append(s.Repositories, repo)
+
+	ind := s.FindIndexById(id)
+	s.Repositories[ind] = repo
+
+	if s, ok := json.Marshal(settings); ok == nil {
+		fileop.WriteSettings(s)
+	}
+
+}
+
+/*
+find index and delete
+*/
+func (s *Settings) DeleteFromRepository(id int) {
+
+	ind := s.FindIndexById(id)
+	s.Repositories = append(s.Repositories[:ind], s.Repositories[ind+1:]...)
+
+	if s, ok := json.Marshal(settings); ok == nil {
+		fileop.WriteSettings(s)
+	}
+
 }
