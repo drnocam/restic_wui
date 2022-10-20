@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { selected_repo } from '/src/store.js';
+    import { selected_repo_id } from '/src/store.js';
      import { onMount, text } from 'svelte/internal';
 import {CmdCheck, ChooseRepository,GetSnapshots, ReadWriteSettings} from '../../wailsjs/go/main/App.js'
     import RepositoryCrud from './RepositoryCrud.svelte';
@@ -15,7 +15,7 @@ let cmd_ready : boolean = false;
 
 
   function get_snapshots() :void {
-    GetSnapshots($selected_repo.password).then(r=>{
+    GetSnapshots($selected_repo_id).then(r=>{
       let onceki = text_result;
       text_result = r+ onceki}
       )
@@ -29,13 +29,7 @@ function read_write_settings() : void {
 
 }
 
-  onMount(()=>{
-    CmdCheck().then(r=>JSON.parse(r)).then(r=>{
-      if("data" in r){
-        cmd_ready = r.data== "1" ? true : false ;  
-      }       
-    })
-  })
+
 </script>
 
 <style>

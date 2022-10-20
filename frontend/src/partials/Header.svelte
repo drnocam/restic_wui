@@ -1,5 +1,5 @@
 <script type="ts">
-    import { dark_mode } from "/src/store";
+    import { dark_mode,repositories,selected_repo_id } from "/src/store";
     import { Router,Link } from "svelte-routing";
     import {
     Button,
@@ -8,7 +8,7 @@
     ModalBody,
     ModalFooter,
     ModalHeader
-  } from 'sveltestrap';
+  } from 'sveltestrap';  
 
     let mode = 'lightbulb-off-fill';
     let dark = 'light';
@@ -45,11 +45,26 @@
       repo_add_modal = !repo_add_modal;
     }
 
+    const repo_info = (e)=>{
+      selected_repo_id.set(e.currentTarget.value)
+    }
+
 </script>
 <Router>
 <nav class="navbar navbar-expand-lg bg-{dark}">
     <div class="container-fluid">
       <div class="navbar-brand"><Link to="/">Restic Command Line Parser UI</Link></div>
+
+      {#if Object.keys($repositories).length > 0}
+      <select class="form-select" aria-label="Repositories" on:change={repo_info}>
+        <option selected>Choose Repository</option>
+        {#each  Object.keys($repositories) as rp}
+        <option value="{rp}">{$repositories[rp]}</option>
+        {/each} 
+        
+      </select>{:else }
+      <div class="alert alert-warning">Add Repository</div>
+    {/if}
 <div>
       <div class="btn btn-{dark}" title="Settings" on:click={settings_toggle}><i class="bi-gear"></i></div>
         <div class="btn btn-{dark}" title="Dark/Light Mode"  on:click={change_mode}><i class="bi-{mode}"></i></div>

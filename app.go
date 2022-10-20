@@ -31,15 +31,27 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
+// Check if command exist
+// * repository list
 func (a *App) CmdCheck() string {
 
 	cmd := exec.Command("restic")
 	err := cmd.Start()
+	var msg string
+	names := make(map[int]string)
 	if err != nil {
-		return fmt.Sprint(JsonReturn(Message{}, "0"))
+		msg = "Restic Command is not Exist or Configured correctly\n"
+		return fmt.Sprint(JsonReturn(Message{0, msg}, ""))
+	} else {
+		msg = "Restic Command Configured Correctly\n"
 	}
-	return fmt.Sprint(JsonReturn(Message{}, "1"))
+	GetSettings()
+	for _, v := range settings.Repositories {
+		names[v.Id] = v.Name
+	}
+	nms, _ := json.Marshal(names)
+	data := fmt.Sprintf("%q:1,\"names\":%s", "cmd_exists", string(nms))
+	return fmt.Sprint(JsonReturn(Message{1, msg}, string(data)))
 }
 
 // repository choose
