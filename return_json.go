@@ -23,5 +23,5 @@ func JsonReturn(message Message, data string) string {
 		Code:    200,
 		Data:    data,
 	}
-	return fmt.Sprintf("{\"code\":%d, \"vers\":%d, \"message\":{\"Type\":%d,\"Message\":%q },\"data\":{%s} }", ret.Code, ret.Version, message.Type, message.Message, data)
+	return fmt.Sprintf("{\"code\":%d, \"vers\":%d, \"message\":{\"Type\":%d,\"Message\":%q },\"data\":%s }", ret.Code, ret.Version, message.Type, message.Message, data)
 }

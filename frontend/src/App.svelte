@@ -5,15 +5,18 @@ import NavUrls from './NavUrls.svelte';
      import { onMount, text } from 'svelte/internal';
     import {CmdCheck } from '../wailsjs/go/main/App.js'
     import { repositories } from './store';
+    import ToastMessage from './partials/ToastMessage.svelte';
+    import { myfetch_json } from './myfuncs';
 
     onMount(()=>{
-    CmdCheck().then(r=>JSON.parse(r)).then(r=>{
+      myfetch_json(CmdCheck,null).then(r=>{
 
-        repositories.set(r.data.names);
+        repositories.set(r.names);
       
     })
   })
 </script>
+<ToastMessage />
 <Header />
 <div class="container-fluid">
   <NavUrls />

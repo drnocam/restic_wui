@@ -7,6 +7,8 @@ export function ChooseRepository():Promise<string>;
 
 export function CmdCheck():Promise<string>;
 
-export function GetSnapshots(arg1:string):Promise<string>;
+export function DeleteRepositorySettings(arg1:number):Promise<string>;
+
+export function GetSnapshots(arg1:number):Promise<string>;
 
 export function ReadWriteSettings():Promise<void>;

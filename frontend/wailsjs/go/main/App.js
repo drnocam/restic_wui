@@ -14,6 +14,10 @@ export function CmdCheck() {
   return window['go']['main']['App']['CmdCheck']();
 }
 
+export function DeleteRepositorySettings(arg1) {
+  return window['go']['main']['App']['DeleteRepositorySettings'](arg1);
+}
+
 export function GetSnapshots(arg1) {
   return window['go']['main']['App']['GetSnapshots'](arg1);
 }

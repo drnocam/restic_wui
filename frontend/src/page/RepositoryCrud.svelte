@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { ChooseRepository,AddUpdateRepository } from "/wailsjs/go/main/App";
+    import { ChooseRepository,AddUpdateRepository,DeleteRepositorySettings } from "/wailsjs/go/main/App";
+    import { selected_repo_id,repositories } from '/src/store.js';
+    import { myfetch_json } from "/src/myfuncs"; 
 
 
 
@@ -14,6 +16,12 @@
         name:null,path:null,password:null,args:null
     }
 
+    function delete_from_repo() :void { 
+        myfetch_json(DeleteRepositorySettings,$selected_repo_id) .then(r=>{
+            repositories.set(r.names);
+    }
+      )
+  }
 
 
     function choose_repository(): void {
@@ -25,12 +33,10 @@
     }
 
     function save_repo() { 
-        AddUpdateRepository(islem,JSON.stringify(repo_form)).then(r=>JSON.parse(r)).then(r=>{
-            (r) => {
-                // repo_form["path"] = r.data.path;
-                console.log(r)
-            }
-        })
+        myfetch_json(AddUpdateRepository,islem,JSON.stringify(repo_form) ).then(r=>{
+            repositories.set(r.names);
+    }
+      )
     }
  
 </script>
@@ -84,7 +90,7 @@
         <span class="text-muted">You may put inputs as new line.</span>
     </div>
     <div class="col-12">
-        <div class="btn btn-danger">Delete Repository</div>
+        <div class="btn btn-danger" on:click={delete_from_repo}>Delete Repository</div>
         <div class="btn btn-success" on:click={save_repo}>SAVE Repository</div>
     </div>
 </form>

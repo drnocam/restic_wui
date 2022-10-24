@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"restic_wui/fileop"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -34,11 +35,11 @@ func (a *App) startup(ctx context.Context) {
 // Check if command exist
 // * repository list
 func (a *App) CmdCheck() string {
-
+	time.Sleep(350 * time.Millisecond)
 	cmd := exec.Command("restic")
 	err := cmd.Start()
 	var msg string
-	names := make(map[int]string)
+
 	if err != nil {
 		msg = "Restic Command is not Exist or Configured correctly\n"
 		return fmt.Sprint(JsonReturn(Message{0, msg}, ""))
@@ -46,11 +47,8 @@ func (a *App) CmdCheck() string {
 		msg = "Restic Command Configured Correctly\n"
 	}
 	GetSettings()
-	for _, v := range settings.Repositories {
-		names[v.Id] = v.Name
-	}
-	nms, _ := json.Marshal(names)
-	data := fmt.Sprintf("%q:1,\"names\":%s", "cmd_exists", string(nms))
+
+	data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
 	return fmt.Sprint(JsonReturn(Message{1, msg}, string(data)))
 }
 
@@ -73,18 +71,28 @@ func (a *App) ChooseRepository() string {
 	return fmt.Sprint(selection)
 }
 
-func (a *App) GetSnapshots(password string) string {
+// settings repository id
+func (a *App) GetSnapshots(id int) string {
 
-	cmd := exec.Command("restic", "-r", selected_repository, "snapshots", "--json")
+	time.Sleep(350 * time.Millisecond)
 
-	newEnv := append(os.Environ(), "RESTIC_PASSWORD="+password)
-	cmd.Env = newEnv
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "snapshots", "--json")
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(out)))
 	}
 
-	return fmt.Sprintf("%s\n", string(out))
+	return fmt.Sprint(JsonReturn(Message{0, "Couldnt find a repository"}, ""))
 
 }
 
@@ -95,28 +103,37 @@ func (a *App) ReadWriteSettings() {
 }
 
 func (a *App) AddUpdateRepository(id int, infos string) string {
-
+	time.Sleep(350 * time.Millisecond)
 	if id == 0 {
 		/*  new record */
 		new_repo := SavedRepository{}
 		err := json.Unmarshal([]byte(infos), &new_repo)
 		if err == nil {
 
-			settings.AddRepository(new_repo)
+			settings.AddRepoSettings(new_repo)
 			/*
 				to see what is added
 			*/
-			if s, ok := json.Marshal(settings); ok == nil {
 
-				return JsonReturn(Message{Message: "New Repository Saved Succesfully", Type: 1}, string(s))
-			} else {
-
-				return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
-			}
+			data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
+			return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(data)))
 
 		}
 		fmt.Printf(err.Error())
 	}
 	return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
+
+}
+
+func (a *App) DeleteRepositorySettings(id int) string {
+
+	time.Sleep(350 * time.Millisecond)
+	if id != -1 {
+		settings.DeleteRepoFromSettings(id)
+		data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
+		return fmt.Sprint(JsonReturn(Message{1, "Save Updated"}, string(data)))
+
+	}
+	return JsonReturn(Message{Message: "Repository not selected", Type: 0}, "")
 
 }

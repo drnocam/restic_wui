@@ -79,7 +79,7 @@ func (s Settings) FindIndexById(id int) int {
 /*
 find max id and add
 */
-func (s *Settings) AddRepository(repo SavedRepository) {
+func (s *Settings) AddRepoSettings(repo SavedRepository) {
 
 	repo.Id = s.FindMaxId() + 1
 	s.Repositories = append(s.Repositories, repo)
@@ -91,7 +91,7 @@ func (s *Settings) AddRepository(repo SavedRepository) {
 /*
 find index and change value
 */
-func (s *Settings) UpdateRepository(id int, repo SavedRepository) {
+func (s *Settings) UpdateRepoSettings(id int, repo SavedRepository) {
 
 	ind := s.FindIndexById(id)
 	s.Repositories[ind] = repo
@@ -105,13 +105,28 @@ func (s *Settings) UpdateRepository(id int, repo SavedRepository) {
 /*
 find index and delete
 */
-func (s *Settings) DeleteFromRepository(id int) {
+func (s *Settings) DeleteRepoFromSettings(id int) {
 
 	ind := s.FindIndexById(id)
-	s.Repositories = append(s.Repositories[:ind], s.Repositories[ind+1:]...)
+	if ind != -1 {
+		s.Repositories = append(s.Repositories[:ind], s.Repositories[ind+1:]...)
+		if s, ok := json.Marshal(settings); ok == nil {
+			fileop.WriteSettings(s)
+		}
 
-	if s, ok := json.Marshal(settings); ok == nil {
-		fileop.WriteSettings(s)
 	}
+
+}
+
+func (s *Settings) RepoNickNames() string {
+
+	names := make(map[int]string)
+
+	for _, v := range settings.Repositories {
+		names[v.Id] = v.Name
+	}
+	nms, _ := json.Marshal(names)
+
+	return string(nms)
 
 }
