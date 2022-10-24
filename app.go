@@ -89,10 +89,10 @@ func (a *App) GetSnapshots(id int) string {
 		if err != nil {
 			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{}"))
 		}
-		return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(out)))
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, string(out)))
 	}
 
-	return fmt.Sprint(JsonReturn(Message{0, "Couldnt find a repository"}, ""))
+	return fmt.Sprint(JsonReturn(Message{0, "Couldnt find a repository"}, "{}"))
 
 }
 
@@ -104,10 +104,12 @@ func (a *App) ReadWriteSettings() {
 
 func (a *App) AddUpdateRepository(id int, infos string) string {
 	time.Sleep(350 * time.Millisecond)
-	if id == 0 {
+	new_repo := SavedRepository{}
+	err := json.Unmarshal([]byte(infos), &new_repo)
+
+	if id == -1 {
 		/*  new record */
-		new_repo := SavedRepository{}
-		err := json.Unmarshal([]byte(infos), &new_repo)
+
 		if err == nil {
 
 			settings.AddRepoSettings(new_repo)
@@ -119,13 +121,18 @@ func (a *App) AddUpdateRepository(id int, infos string) string {
 			return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(data)))
 
 		}
-		fmt.Printf(err.Error())
+	} else {
+		if err == nil {
+			settings.UpdateRepoSettings(id, new_repo)
+			data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
+			return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(data)))
+		}
 	}
 	return JsonReturn(Message{Message: "Couldnt Save", Type: 0}, infos)
 
 }
 
-func (a *App) DeleteRepositorySettings(id int) string {
+func (a *App) DeleteRepositorySetting(id int) string {
 
 	time.Sleep(350 * time.Millisecond)
 	if id != -1 {
@@ -136,4 +143,24 @@ func (a *App) DeleteRepositorySettings(id int) string {
 	}
 	return JsonReturn(Message{Message: "Repository not selected", Type: 0}, "")
 
+}
+
+/*
+* delete from disk and settings
+ */
+func (a *App) DeleteRepositoryFromDisk(id int) string {
+
+	time.Sleep(350 * time.Millisecond)
+	if id != -1 {
+		settings.DeleteRepoFromSettings(id)
+		data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
+		return fmt.Sprint(JsonReturn(Message{1, "Save Updated"}, string(data)))
+
+	}
+	return JsonReturn(Message{Message: "Repository not selected", Type: 0}, "")
+
+}
+
+func (a *App) GetRepoInfo(id int) string {
+	return JsonReturn(Message{Message: "", Type: 1}, settings.GetRepoInfo(id))
 }

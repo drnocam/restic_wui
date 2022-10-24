@@ -33,7 +33,7 @@ export const myfetch_json = (func,...params) => {
         if("message" in r) {
             if( r.message.Type == 0 ) {
                 warning_notify(r.message.Message)
-            } else {
+            } else if( r.message.Type == 1 ) {
                 success_notify(r.message.Message)
             }
         }

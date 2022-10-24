@@ -11,7 +11,7 @@ var settings Settings
 /*
 * snapshots repo infos.
  */
-type RepositoryInfo struct {
+type SnapShotInfo struct {
 	Time     string   `json: "time"`
 	Paths    []string `json: "paths"`
 	Tags     []string `json: "tags"`
@@ -25,12 +25,12 @@ type RepositoryInfo struct {
 * id to update uniqe
  */
 type SavedRepository struct {
-	Path     string `json: "path"`
-	Password string `json: "password"`
-	Name     string `json: "name"`
-	Args     string `json: "args"`
-	Size     int    `json: "size"`
-	Id       int    `json: "id"`
+	Path     string `json: "Path"`
+	Password string `json: "Password"`
+	Name     string `json: "Name"`
+	Args     string `json: "Args"`
+	Size     int    `json: "Size"`
+	Id       int    `json: "Id"`
 }
 
 /*
@@ -129,4 +129,15 @@ func (s *Settings) RepoNickNames() string {
 
 	return string(nms)
 
+}
+
+func (s *Settings) GetRepoInfo(id int) string {
+	ind := s.FindIndexById(id)
+	if ind != -1 {
+		if s, ok := json.Marshal(s.Repositories[ind]); ok == nil {
+			return string(s)
+		}
+
+	}
+	return ""
 }

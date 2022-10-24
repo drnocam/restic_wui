@@ -7,7 +7,11 @@ export function ChooseRepository():Promise<string>;
 
 export function CmdCheck():Promise<string>;
 
-export function DeleteRepositorySettings(arg1:number):Promise<string>;
+export function DeleteRepositoryFromDisk(arg1:number):Promise<string>;
+
+export function DeleteRepositorySetting(arg1:number):Promise<string>;
+
+export function GetRepoInfo(arg1:number):Promise<string>;
 
 export function GetSnapshots(arg1:number):Promise<string>;
 

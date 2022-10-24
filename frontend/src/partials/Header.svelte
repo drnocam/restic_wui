@@ -10,7 +10,7 @@
     ModalHeader
   } from 'sveltestrap';  
     import RepositoryCrud from "/src/page/RepositoryCrud.svelte";
-    import { GetSnapshots } from "/wailsjs/go/main/App"; 
+    import { GetSnapshots ,GetRepoInfo} from "/wailsjs/go/main/App"; 
     import { myfetch_json } from "/src/myfuncs";
 
     let mode = 'lightbulb-off-fill';
@@ -18,7 +18,9 @@
     let settings_modal = false;
     let repo_add_modal = false;
     let islem = 0; // 0 , 1 add , update vs repo
-
+    let repo_form = {
+        Name:null,Path:null,Password:null,Args:null
+    }
 
     dark_mode.subscribe(m=>{
     if(m==0) {
@@ -52,15 +54,30 @@
       settings_modal = !settings_modal;
     }
 
-    const repo_toggle = ()=>{
-      repo_add_modal = !repo_add_modal;
-    }
+
 
     const repo_info = (e)=>{
       selected_repo_id.set(parseInt(e.currentTarget.value))
-
-get_snapshots()
+      get_snapshots()
       
+    }
+
+    function edit_repo() { 
+        if($selected_repo_id != -1){
+      repo_add_modal = true;
+            myfetch_json(GetRepoInfo, $selected_repo_id ).then(r=>{
+            repo_form = r 
+                }      )
+        }
+        
+    }
+
+    function add_repo() { 
+      selected_repo_id.set(-1) 
+      repo_add_modal = true;
+      repo_form  =  {
+          Name:null,Path:null,Password:null,Args:null
+      }
     }
 
 </script>
@@ -81,9 +98,9 @@ get_snapshots()
     {/if}
 <div style="white-space:nowrap">
 {#if $selected_repo_id != -1}
-      <div class="btn btn-{dark}" title="Update Repository" on:click={repo_toggle}><i class="bi-pen"></i></div>
+      <div class="btn btn-{dark}" title="Update Repository" on:click={edit_repo}><i class="bi-pen"></i></div>
 {/if}
-      <div class="btn btn-{dark}" title="Add Repository" on:click={repo_toggle}><i class="bi-plus"></i></div>
+      <div class="btn btn-{dark}" title="Add Repository" on:click={add_repo}><i class="bi-plus"></i></div>
       <div class="btn btn-{dark}" title="Settings" on:click={settings_toggle}><i class="bi-gear"></i></div>
         <div class="btn btn-{dark}" title="Dark/Light Mode"  on:click={change_mode}><i class="bi-{mode}"></i></div>
       </div>
@@ -94,8 +111,7 @@ get_snapshots()
   <ModalHeader {settings_toggle}>Modal title</ModalHeader>
   <ModalBody>
     Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua.
-    <div class="btn btn-{dark}"  on:click={repo_toggle}>asdfasdfas</div>
+    tempor incididunt ut labore et dolore magna aliqua. 
 
   </ModalBody>
   <ModalFooter>
@@ -103,15 +119,4 @@ get_snapshots()
     <Button color="secondary" on:click={settings_toggle}>Cancel</Button>
   </ModalFooter>
 </Modal>
-<Modal isOpen={repo_add_modal} toggle={repo_toggle} size="lg">
-  <ModalHeader {repo_toggle}>
-    {#if islem == 0}
-    Update / Delete Repository
-    {/if}
-  </ModalHeader>
-  <ModalBody>
-    {#if islem == 0}
-    <RepositoryCrud />
-    {/if}
-  </ModalBody> 
-</Modal>
+<RepositoryCrud {repo_form} bind:repo_add_modal={repo_add_modal} parent_snapshot_function={get_snapshots} />

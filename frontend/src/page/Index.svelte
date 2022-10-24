@@ -2,7 +2,6 @@
     import { snapshots } from '/src/store.js';
      import { onMount, text } from 'svelte/internal';
 import {GetSnapshots, ReadWriteSettings} from '../../wailsjs/go/main/App.js'
-    import RepositoryCrud from './RepositoryCrud.svelte';
 
 
 let cmd_ready : boolean = false;
@@ -17,7 +16,7 @@ let cmd_ready : boolean = false;
 <style>
     
 </style>
-
+<button class="btn btn-primary">Create New Repository</button>
     <div style="min-height:200px ">
       {#if Array.isArray($snapshots) }
       {#each $snapshots as s_arr}
