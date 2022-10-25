@@ -105,24 +105,48 @@ func (a *App) ReadWriteSettings() {
 func (a *App) AddUpdateRepository(id int, infos string) string {
 	time.Sleep(350 * time.Millisecond)
 	new_repo := SavedRepository{}
-	err := json.Unmarshal([]byte(infos), &new_repo)
+	err_json := json.Unmarshal([]byte(infos), &new_repo)
 
-	if id == -1 {
-		/*  new record */
-
-		if err == nil {
-
-			settings.AddRepoSettings(new_repo)
+	if err_json == nil {
+		if id == -1 {
+			/*  new record */
 			/*
-				to see what is added
+				if folder exists and empty then create init.
+				if folder exists and not empty then check config file exists so this is restic repo
+				else give error and do not add settings.
 			*/
 
-			data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
-			return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(data)))
+			if ok, err_empty := fileop.IsEmpty(new_repo.Path); ok {
 
-		}
-	} else {
-		if err == nil {
+				// restic init pass....
+
+			} else {
+
+				if ok, err := fileop.Exists(new_repo.Path + "/config"); ok {
+
+					settings.AddRepoSettings(new_repo)
+					/*
+						to see what is added
+					*/
+
+					data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
+					return fmt.Sprint(JsonReturn(Message{1, "New Repository Settings Saved Succesfully"}, string(data)))
+
+				} else {
+					err_msg := fmt.Sprintf("Couldnt open the config file : %s ", err.Error())
+					return JsonReturn(Message{Message: err_msg, Type: 0}, "{}")
+
+				}
+
+				// err_msg := fmt.Sprintf("Couldnt open the folder : %s ", err.Error())
+				// return JsonReturn(Message{Message: err_msg, Type: 0}, "{}")
+
+			}
+
+		} else {
+			/*
+				update info
+			*/
 			settings.UpdateRepoSettings(id, new_repo)
 			data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
 			return fmt.Sprint(JsonReturn(Message{1, "New Repository Saved Succesfully"}, string(data)))
