@@ -85,7 +85,7 @@
 <nav class="navbar navbar-expand-lg bg-{dark}">
     <div class="container-fluid">
       <div class="navbar-brand"><Link to="/">Restic Command Line Parser UI</Link></div>
-
+      {#if typeof $repositories === 'object'}
       {#if Object.keys($repositories).length > 0}
       <select class="form-select" aria-label="Repositories" on:change={repo_info}>
         <option selected>Choose Repository</option>
@@ -95,6 +95,7 @@
         
       </select>{:else }
       <div class="alert alert-warning">Add Repository</div>
+    {/if}
     {/if}
 <div style="white-space:nowrap">
 {#if $selected_repo_id != -1}

@@ -59,6 +59,11 @@ TODO: delete from disk
     function save_repo() { 
         myfetch_json(AddUpdateRepository, $selected_repo_id,JSON.stringify(repo_form) ).then(r=>{
             repositories.set(r.names);
+            // 
+            /* 
+            TODO find repo_form name and select id.
+            selected_repo_id.set(r.)
+            */
             repo_toggle() 
             parent_snapshot_function()
         }
