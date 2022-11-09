@@ -3,6 +3,8 @@
 
 export function AddUpdateRepository(arg1:number,arg2:string):Promise<string>;
 
+export function CheckRepoErrors(arg1:number):Promise<string>;
+
 export function ChooseRepository():Promise<string>;
 
 export function CmdCheck():Promise<string>;
@@ -12,6 +14,8 @@ export function DeleteRepositoryFromDisk(arg1:number):Promise<string>;
 export function DeleteRepositorySetting(arg1:number):Promise<string>;
 
 export function GetRepoInfo(arg1:number):Promise<string>;
+
+export function GetRepoStats(arg1:number):Promise<string>;
 
 export function GetSnapshots(arg1:number):Promise<string>;
 

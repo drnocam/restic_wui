@@ -6,6 +6,10 @@ export function AddUpdateRepository(arg1, arg2) {
   return window['go']['main']['App']['AddUpdateRepository'](arg1, arg2);
 }
 
+export function CheckRepoErrors(arg1) {
+  return window['go']['main']['App']['CheckRepoErrors'](arg1);
+}
+
 export function ChooseRepository() {
   return window['go']['main']['App']['ChooseRepository']();
 }
@@ -24,6 +28,10 @@ export function DeleteRepositorySetting(arg1) {
 
 export function GetRepoInfo(arg1) {
   return window['go']['main']['App']['GetRepoInfo'](arg1);
+}
+
+export function GetRepoStats(arg1) {
+  return window['go']['main']['App']['GetRepoStats'](arg1);
 }
 
 export function GetSnapshots(arg1) {

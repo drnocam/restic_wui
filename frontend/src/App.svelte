@@ -7,6 +7,7 @@ import NavUrls from './NavUrls.svelte';
     import { repositories } from './store';
     import ToastMessage from './partials/ToastMessage.svelte';
     import { myfetch_json } from './myfuncs';
+    import { EventsOn } from '../wailsjs/runtime'
 
     onMount(()=>{
       myfetch_json(CmdCheck,null).then(r=>{
@@ -14,6 +15,14 @@ import NavUrls from './NavUrls.svelte';
         repositories.set(r.names);
       
     })
+
+    console.log(EventsOn);
+    EventsOn("event_test", x => {
+        if (x) {
+            console.log(x);
+        } 
+    });
+
   })
 </script>
 <ToastMessage />

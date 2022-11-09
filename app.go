@@ -1,3 +1,9 @@
+/*
+TODO: merge restic commands for one function
+time waiting for some animations may remove at future
+
+*/
+
 package main
 
 import (
@@ -30,6 +36,7 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 
 	a.ctx = ctx
+
 }
 
 // Check if command exist
@@ -47,6 +54,8 @@ func (a *App) CmdCheck() string {
 		msg = "Restic Command Configured Correctly\n"
 	}
 	GetSettings()
+
+	runtime.EventsEmit(a.ctx, "event_test", EventTest())
 
 	data := fmt.Sprintf("{%q:1,\"names\":%s}", "cmd_exists", settings.RepoNickNames())
 	return fmt.Sprint(JsonReturn(Message{1, msg}, string(data)))
@@ -74,7 +83,7 @@ func (a *App) ChooseRepository() string {
 // settings repository id
 func (a *App) GetSnapshots(id int) string {
 
-	time.Sleep(350 * time.Millisecond)
+	//time.Sleep(350 * time.Millisecond)
 
 	settings_index := settings.FindIndexById(id)
 
@@ -87,12 +96,13 @@ func (a *App) GetSnapshots(id int) string {
 		cmd.Env = newEnv
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{}"))
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 		}
+
 		return fmt.Sprint(JsonReturn(Message{-1, ""}, string(out)))
 	}
 
-	return fmt.Sprint(JsonReturn(Message{0, "Couldnt find a repository"}, "{}"))
+	return fmt.Sprint(JsonReturn(Message{0, "Couldnt find a repository"}, "{\"error\":1}"))
 
 }
 
@@ -148,7 +158,7 @@ func (a *App) AddUpdateRepository(id int, infos string) string {
 
 					} else {
 						err_msg := fmt.Sprintf("Couldnt open the config file : %s ", err.Error())
-						return JsonReturn(Message{Message: err_msg, Type: 0}, "{}")
+						return JsonReturn(Message{Message: err_msg, Type: 0}, "{\"error\":1}")
 
 					}
 				}
@@ -156,7 +166,7 @@ func (a *App) AddUpdateRepository(id int, infos string) string {
 			} else {
 
 				err_msg := fmt.Sprintf("Couldnt open the folder : %s ", err.Error())
-				return JsonReturn(Message{Message: err_msg, Type: 0}, "{}")
+				return JsonReturn(Message{Message: err_msg, Type: 0}, "{\"error\":1}")
 
 			}
 
@@ -204,4 +214,54 @@ func (a *App) DeleteRepositoryFromDisk(id int) string {
 
 func (a *App) GetRepoInfo(id int) string {
 	return JsonReturn(Message{Message: "", Type: 1}, settings.GetRepoInfo(id))
+}
+
+func (a *App) GetRepoStats(id int) string {
+
+	time.Sleep(350 * time.Millisecond)
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "stats", "--json")
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, string(out)))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
+func (a *App) CheckRepoErrors(id int) string {
+
+	time.Sleep(350 * time.Millisecond)
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "check", "--json")
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("%q", string(out))))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
+func EventTest() string {
+	return fmt.Sprint("event test pushed a value")
 }

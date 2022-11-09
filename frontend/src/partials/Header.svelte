@@ -44,8 +44,17 @@
         }
     }
     function get_snapshots() :void {
+
           myfetch_json(GetSnapshots,$selected_repo_id).then(r=>{
-            snapshots.set(r) 
+            if("error" in r) {
+              selected_repo_id.set(-1)
+            }else {
+              r.forEach(el => { 
+                let x = new Date(Date.parse(el.time));
+                el.time =  x.toLocaleString("tr-TR")
+              });
+              snapshots.set(r) 
+            }
           }
             )
         }
@@ -57,7 +66,9 @@
 
 
     const repo_info = (e)=>{
+
       selected_repo_id.set(parseInt(e.currentTarget.value))
+      snapshots.set({})
       get_snapshots()
       
     }

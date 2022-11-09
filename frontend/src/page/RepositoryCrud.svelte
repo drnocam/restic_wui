@@ -7,23 +7,28 @@
     ModalFooter,
     ModalHeader
   } from 'sveltestrap';  
-    import { ChooseRepository,AddUpdateRepository,DeleteRepositorySetting,DeleteRepositoryFromDisk } from "/wailsjs/go/main/App";
+    import { ChooseRepository,AddUpdateRepository,DeleteRepositorySetting,DeleteRepositoryFromDisk,GetRepoStats,CheckRepoErrors } from "/wailsjs/go/main/App";
     import { selected_repo_id,repositories } from '/src/store.js';
-    import { myfetch_json } from "/src/myfuncs"; 
+    import { myfetch_json ,formatBytes } from "/src/myfuncs";  
 
 
-
-    export let parent_snapshot_function = null;
+/* == Variables == */
+    let modal_info = "";
+    let modal_open = false;
     /* 
     0 : new record
     1 : update_id
     */
     let islem : number = 0;
+    export let parent_snapshot_function = null;
+    
 
     export let repo_add_modal = false;
     export let repo_form = {
         Name:null,Path:null,Password:null,Args:null
     }
+/* == Variables End == */
+
 
     function delete_from_settings() :void { 
         myfetch_json(DeleteRepositorySetting,$selected_repo_id) .then(r=>{
@@ -70,18 +75,58 @@ TODO: delete from disk
       )
     }
 
+
+    const get_stats = () => {
+        myfetch_json(GetRepoStats, $selected_repo_id,JSON.stringify(repo_form) ).then(r=>{
+            if(r){
+                toggleModal()
+                modal_info = '<strong>Snapshots Count</strong>: ' + r['snapshots_count'] + '<br><strong>Total File</strong>: ' 
+                + r['total_file_count'] + '<br><strong>Total Size</strong>: '  + formatBytes(r['total_size']) ;
+
+            }            
+        }
+      )
+    }
     
 
+    const check_backup = () => {
+        myfetch_json(CheckRepoErrors, $selected_repo_id,JSON.stringify(repo_form) ).then(r=>{
+            if(r){
+                toggleModal()
+                modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
+
+            }            
+        }
+      )
+    }
+
+const toggleModal = () => {
+    /* 
+    * if modal is open then it will be closed so reset modal_info;
+    */
+    if(modal_open ) {
+        modal_info = "";
+    }
+    modal_open = !modal_open;
+
+}
 
  
 </script> 
+{#if $selected_repo_id != -1}
+
+<Modal isOpen={modal_open} toggle={toggleModal} >
+    <ModalBody>
+        {@html modal_info}
+    </ModalBody>
+</Modal>
 <div class="btn btn-primary">Backup</div>
-<div class="btn btn-primary">Check Backup</div>
+<div class="btn btn-primary" on:click={check_backup}>Check Backup....</div>
 <div class="btn btn-primary">Show Difference</div>
 <div class="btn btn-primary">Forget</div>
 <div class="btn btn-primary">List In Snapshot</div>
 <div class="btn btn-primary">Find In Snapshot</div>
-<div class="btn btn-primary">Stats</div>
+<div class="btn btn-primary" on:click={get_stats}>Stats</div>
 <div class="btn btn-primary">Unlock</div>
 <div class="btn btn-primary">Tag</div>
 <Modal isOpen={repo_add_modal} toggle={repo_toggle} size="lg">
@@ -153,6 +198,7 @@ TODO: delete from disk
 </form>
     </ModalBody> 
   </Modal> 
+  {/if}
 <style>
     /* your styles go here */
 </style>
