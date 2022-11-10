@@ -262,6 +262,32 @@ func (a *App) CheckRepoErrors(id int) string {
 	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 }
 
+func (a *App) SearchInRepo(id int, search_text string) string {
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "--json", "find", search_text)
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+
+		fmt.Println(cmd.String())
+
+		out, err := cmd.CombinedOutput()
+
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, string(out)))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
 func EventTest() string {
 	return fmt.Sprint("event test pushed a value")
 }

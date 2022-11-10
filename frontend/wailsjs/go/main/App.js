@@ -41,3 +41,7 @@ export function GetSnapshots(arg1) {
 export function ReadWriteSettings() {
   return window['go']['main']['App']['ReadWriteSettings']();
 }
+
+export function SearchInRepo(arg1, arg2) {
+  return window['go']['main']['App']['SearchInRepo'](arg1, arg2);
+}

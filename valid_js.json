@@ -1,0 +1,88 @@
+[
+    {
+        "matches": [
+            {
+                "path": "/erasmus2/about.html",
+                "permissions": "-rwxr-xr-x",
+                "type": "file",
+                "mode": 493,
+                "mtime": "2015-04-07T14:29:19+03:00",
+                "atime": "2015-04-07T14:29:19+03:00",
+                "ctime": "2018-01-30T10:14:55.633662522+03:00",
+                "uid": 1000,
+                "gid": 1000,
+                "user": "cam",
+                "group": "cam",
+                "device_id": 2053,
+                "size": 37201,
+                "links": 1
+            },
+            {
+                "path": "/erasmus2/images/index.html",
+                "permissions": "-rwxr-xr-x",
+                "type": "file",
+                "mode": 493,
+                "mtime": "2015-04-07T12:27:46+03:00",
+                "atime": "2015-04-07T12:27:46+03:00",
+                "ctime": "2018-01-30T10:14:55.650329342+03:00",
+                "uid": 1000,
+                "gid": 1000,
+                "user": "cam",
+                "group": "cam",
+                "device_id": 2053,
+                "size": 7626,
+                "links": 1
+            },
+            {
+                "path": "/erasmus2/images/prettyPhoto/index.html",
+                "permissions": "-rwxr-xr-x",
+                "type": "file",
+                "mode": 493,
+                "mtime": "2015-04-07T12:30:34+03:00",
+                "atime": "2015-04-07T12:30:34+03:00",
+                "ctime": "2018-01-30T10:14:55.633662522+03:00",
+                "uid": 1000,
+                "gid": 1000,
+                "user": "cam",
+                "group": "cam",
+                "device_id": 2053,
+                "size": 677,
+                "links": 1
+            },
+            {
+                "path": "/erasmus2/index.html",
+                "permissions": "-rwxr-xr-x",
+                "type": "file",
+                "mode": 493,
+                "mtime": "2015-04-24T23:02:21+03:00",
+                "atime": "2015-04-24T23:02:21+03:00",
+                "ctime": "2018-01-30T10:14:55.633662522+03:00",
+                "uid": 1000,
+                "gid": 1000,
+                "user": "cam",
+                "group": "cam",
+                "device_id": 2053,
+                "size": 36496,
+                "links": 1
+            },
+            {
+                "path": "/erasmus2/test.html",
+                "permissions": "-rwxr-xr-x",
+                "type": "file",
+                "mode": 493,
+                "mtime": "2015-04-07T15:17:16+03:00",
+                "atime": "2015-04-07T15:17:16+03:00",
+                "ctime": "2018-01-30T10:14:55.653662706+03:00",
+                "uid": 1000,
+                "gid": 1000,
+                "user": "cam",
+                "group": "cam",
+                "device_id": 2053,
+                "size": 823,
+                "links": 1
+            }
+        ],
+        "hits": 5,
+        "snapshot": "d443397c71e2a2ddc5df6b23a0152bf93a231d45aaa9e1e2ef83d8d98eb53fa9"
+    }
+]

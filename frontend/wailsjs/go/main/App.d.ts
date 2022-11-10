@@ -20,3 +20,5 @@ export function GetRepoStats(arg1:number):Promise<string>;
 export function GetSnapshots(arg1:number):Promise<string>;
 
 export function ReadWriteSettings():Promise<void>;
+
+export function SearchInRepo(arg1:number,arg2:string):Promise<string>;

@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { snapshots } from '/src/store.js';
+    import FindResults from '/src/partials/FindResults.svelte';
+import { snapshots } from '/src/store.js';
 
 
 
@@ -9,6 +10,9 @@
 <style>
     
 </style>
+
+<FindResults />
+
     <div style="min-height:200px ">
       {#if Array.isArray($snapshots) }
       {#each $snapshots as s_arr}

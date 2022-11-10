@@ -3,14 +3,14 @@ import {  toast } from '@zerodevx/svelte-toast'
 
 
 
-const warning_notify = (metin) => {
+export const warning_notify = (metin) => {
     toast.push(metin, { theme: { 
         '--toastBackground': 'yellow',
         '--toastColor': 'black',
         '--toastBarBackground': 'olive'
      } })
 }
-const success_notify = (metin) => {
+export const success_notify = (metin) => {
     toast.push(metin, { theme: { 
         '--toastBackground': 'green',
         '--toastColor': 'white',
