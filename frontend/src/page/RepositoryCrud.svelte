@@ -1,5 +1,7 @@
 <script lang="ts">
     import {
+        Accordion,
+    AccordionItem,
     Button,
     ButtonGroup,
     Modal,
@@ -7,9 +9,10 @@
     ModalFooter,
     ModalHeader
   } from 'sveltestrap';  
-    import { ChooseRepository,AddUpdateRepository,DeleteRepositorySetting,DeleteRepositoryFromDisk,GetRepoStats,CheckRepoErrors } from "/wailsjs/go/main/App";
-    import { selected_repo_id,repositories } from '/src/store.js';
+    import { ListFilesInSnapshots,RestoreRepo,ChooseRepository,AddUpdateRepository,DeleteRepositorySetting,DeleteRepositoryFromDisk,GetRepoStats,CheckRepoErrors } from "/wailsjs/go/main/App";
+    import { selected_repo_id,repositories,snapshots } from '/src/store.js';
     import { myfetch_json ,formatBytes } from "/src/myfuncs";  
+    import FindResults from '/src/partials/FindResults.svelte';
 
 
 /* == Variables == */
@@ -100,6 +103,29 @@ TODO: delete from disk
       )
     }
 
+
+    const restore_snapshot = (snapshot_id) => {
+        myfetch_json(RestoreRepo, $selected_repo_id,snapshot_id ).then(r=>{
+            if(r){
+                toggleModal()
+                modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
+
+            }            
+        }
+      )
+    }
+
+    const list_files_in_snapshot = (snapshot_id) => {
+        myfetch_json(ListFilesInSnapshots, $selected_repo_id,snapshot_id ).then(r=>{
+            if(r){
+                toggleModal()
+                modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
+
+            }            
+        }
+      )
+    }
+
 const toggleModal = () => {
     /* 
     * if modal is open then it will be closed so reset modal_info;
@@ -114,6 +140,43 @@ const toggleModal = () => {
  
 </script> 
 {#if $selected_repo_id != -1}
+
+<FindResults />
+
+    <div style="min-height:200px ">
+      {#if Array.isArray($snapshots) }
+
+
+<Accordion>
+    {#each $snapshots as s_arr}
+    <AccordionItem >
+        <div slot="header" class="d-flex justify-content-between">
+            <div><strong>Snapshot Id:</strong> {s_arr["short_id"]} </div>
+            <div >At Time: {s_arr["time"]}"</div>
+        </div> 
+        <div class="btn btn-primary" on:click={()=>{
+            restore_snapshot(s_arr["short_id"])
+        }}>Restore Snapshot Id:
+            <span class="">{s_arr["short_id"]}</span> 
+            </div>
+        <div class="btn btn-primary" on:click={()=>{
+            list_files_in_snapshot(s_arr["id"])
+        }}>List Files In Snapshot Id:
+            <span class="">{s_arr["short_id"]}</span> 
+            </div>
+        {#each Object.keys(s_arr) as sp}
+    <div><strong>{sp}</strong> : {s_arr[sp]}</div>
+      {/each}
+    </AccordionItem>
+
+    {/each}
+</Accordion> 
+      
+
+      <hr>
+      {/if}
+    </div>
+
 
 <Modal isOpen={modal_open} toggle={toggleModal} >
     <ModalBody>

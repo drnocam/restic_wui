@@ -288,6 +288,57 @@ func (a *App) SearchInRepo(id int, search_text string) string {
 	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 }
 
+func (a *App) RestoreRepo(id int, snapshot_id string) string {
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		cwd, _ := os.Getwd()
+		target_dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+			Title:            "Choose Directory To Restore",
+			DefaultDirectory: cwd,
+		})
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Directory couldnt opened!"}, "{\"error\":1}"))
+		}
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "restore", snapshot_id, "--target", target_dir)
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("%q", string(out))))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
+func (a *App) ListFilesInSnapshots(id int, snapshot_id string) string {
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "ls", snapshot_id)
+
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("%q", string(out))))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
 func EventTest() string {
 	return fmt.Sprint("event test pushed a value")
 }

@@ -38,8 +38,16 @@ export function GetSnapshots(arg1) {
   return window['go']['main']['App']['GetSnapshots'](arg1);
 }
 
+export function ListFilesInSnapshots(arg1, arg2) {
+  return window['go']['main']['App']['ListFilesInSnapshots'](arg1, arg2);
+}
+
 export function ReadWriteSettings() {
   return window['go']['main']['App']['ReadWriteSettings']();
+}
+
+export function RestoreRepo(arg1, arg2) {
+  return window['go']['main']['App']['RestoreRepo'](arg1, arg2);
 }
 
 export function SearchInRepo(arg1, arg2) {
