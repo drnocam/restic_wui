@@ -13,6 +13,7 @@
     import { selected_repo_id,repositories,snapshots } from '/src/store.js';
     import { myfetch_json ,formatBytes } from "/src/myfuncs";  
     import FindResults from '/src/partials/FindResults.svelte';
+    import SnapshotCrud from '/src/partials/SnapshotCrud.svelte';
 
 
 /* == Variables == */
@@ -104,29 +105,7 @@ TODO: delete from disk
     }
 
 
-    const restore_snapshot = (snapshot_id) => {
-        myfetch_json(RestoreRepo, $selected_repo_id,snapshot_id ).then(r=>{
-            if(r){
-                toggleModal()
-                modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
-
-            }            
-        }
-      )
-    }
-
-    const list_files_in_snapshot = (snapshot_id) => {
-        myfetch_json(ListFilesInSnapshots, $selected_repo_id,snapshot_id ).then(r=>{
-            if(r){
-                toggleModal()
-                modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
-
-            }            
-        }
-      )
-    }
-
-const toggleModal = () => {
+    const toggleModal = () => {
     /* 
     * if modal is open then it will be closed so reset modal_info;
     */
@@ -154,19 +133,8 @@ const toggleModal = () => {
             <div><strong>Snapshot Id:</strong> {s_arr["short_id"]} </div>
             <div >At Time: {s_arr["time"]}"</div>
         </div> 
-        <div class="btn btn-primary" on:click={()=>{
-            restore_snapshot(s_arr["short_id"])
-        }}>Restore Snapshot Id:
-            <span class="">{s_arr["short_id"]}</span> 
-            </div>
-        <div class="btn btn-primary" on:click={()=>{
-            list_files_in_snapshot(s_arr["id"])
-        }}>List Files In Snapshot Id:
-            <span class="">{s_arr["short_id"]}</span> 
-            </div>
-        {#each Object.keys(s_arr) as sp}
-    <div><strong>{sp}</strong> : {s_arr[sp]}</div>
-      {/each}
+        <SnapshotCrud snapshot_info={s_arr} />
+        
     </AccordionItem>
 
     {/each}

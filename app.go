@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"restic_wui/fileop"
+	"strings"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -326,7 +327,7 @@ func (a *App) ListFilesInSnapshots(id int, snapshot_id string) string {
 
 		selected_repository := &settings.Repositories[settings_index]
 
-		cmd := exec.Command("restic", "-r", selected_repository.Path, "ls", snapshot_id)
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "ls", snapshot_id, "--json")
 
 		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
 		cmd.Env = newEnv
@@ -334,7 +335,8 @@ func (a *App) ListFilesInSnapshots(id int, snapshot_id string) string {
 		if err != nil {
 			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 		}
-		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("%q", string(out))))
+		add_comma := strings.Replace(string(out), "}\n{", "},{", -1)
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("[%s]", add_comma)))
 	}
 	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 }

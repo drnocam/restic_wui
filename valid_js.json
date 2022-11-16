@@ -1,88 +1,30 @@
 [
     {
-        "matches": [
-            {
-                "path": "/erasmus2/about.html",
-                "permissions": "-rwxr-xr-x",
-                "type": "file",
-                "mode": 493,
-                "mtime": "2015-04-07T14:29:19+03:00",
-                "atime": "2015-04-07T14:29:19+03:00",
-                "ctime": "2018-01-30T10:14:55.633662522+03:00",
-                "uid": 1000,
-                "gid": 1000,
-                "user": "cam",
-                "group": "cam",
-                "device_id": 2053,
-                "size": 37201,
-                "links": 1
-            },
-            {
-                "path": "/erasmus2/images/index.html",
-                "permissions": "-rwxr-xr-x",
-                "type": "file",
-                "mode": 493,
-                "mtime": "2015-04-07T12:27:46+03:00",
-                "atime": "2015-04-07T12:27:46+03:00",
-                "ctime": "2018-01-30T10:14:55.650329342+03:00",
-                "uid": 1000,
-                "gid": 1000,
-                "user": "cam",
-                "group": "cam",
-                "device_id": 2053,
-                "size": 7626,
-                "links": 1
-            },
-            {
-                "path": "/erasmus2/images/prettyPhoto/index.html",
-                "permissions": "-rwxr-xr-x",
-                "type": "file",
-                "mode": 493,
-                "mtime": "2015-04-07T12:30:34+03:00",
-                "atime": "2015-04-07T12:30:34+03:00",
-                "ctime": "2018-01-30T10:14:55.633662522+03:00",
-                "uid": 1000,
-                "gid": 1000,
-                "user": "cam",
-                "group": "cam",
-                "device_id": 2053,
-                "size": 677,
-                "links": 1
-            },
-            {
-                "path": "/erasmus2/index.html",
-                "permissions": "-rwxr-xr-x",
-                "type": "file",
-                "mode": 493,
-                "mtime": "2015-04-24T23:02:21+03:00",
-                "atime": "2015-04-24T23:02:21+03:00",
-                "ctime": "2018-01-30T10:14:55.633662522+03:00",
-                "uid": 1000,
-                "gid": 1000,
-                "user": "cam",
-                "group": "cam",
-                "device_id": 2053,
-                "size": 36496,
-                "links": 1
-            },
-            {
-                "path": "/erasmus2/test.html",
-                "permissions": "-rwxr-xr-x",
-                "type": "file",
-                "mode": 493,
-                "mtime": "2015-04-07T15:17:16+03:00",
-                "atime": "2015-04-07T15:17:16+03:00",
-                "ctime": "2018-01-30T10:14:55.653662706+03:00",
-                "uid": 1000,
-                "gid": 1000,
-                "user": "cam",
-                "group": "cam",
-                "device_id": 2053,
-                "size": 823,
-                "links": 1
-            }
+        "time": "2022-10-13T12:07:25.106590609+03:00",
+        "tree": "76fe9dca9bdc6c43f56c97e12edb86be8b810b09370b0342eefe5a87ab991a77",
+        "paths": [
+            "/home/cam/public_html/database.php"
         ],
-        "hits": 5,
-        "snapshot": "d443397c71e2a2ddc5df6b23a0152bf93a231d45aaa9e1e2ef83d8d98eb53fa9"
+        "hostname": "archlinux",
+        "username": "cam",
+        "uid": 1000,
+        "gid": 1000,
+        "id": "35fde6533649d1c08ba862bde455824a3ee09f7e8f8d8f2d1334b6b1c239cfa0",
+        "short_id": "35fde653",
+        "struct_type": "snapshot"
+    },
+    {
+        "name": "database.php",
+        "type": "file",
+        "path": "/database.php",
+        "uid": 1000,
+        "gid": 1000,
+        "size": 340,
+        "mode": 420,
+        "permissions": "-rw-r--r--",
+        "mtime": "2017-06-06T14:22:12.830738865+03:00",
+        "atime": "2017-06-06T14:22:12.830738865+03:00",
+        "ctime": "2017-06-06T14:22:12.830738865+03:00",
+        "struct_type": "node"
     }
 ]
