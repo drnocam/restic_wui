@@ -63,3 +63,10 @@ export function formatBytes(bytes, decimals = 2) {
 
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
+/* 
+copied from
+https://css-tricks.com/snippets/javascript/htmlentities-for-javascript/
+*/
+export function htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}

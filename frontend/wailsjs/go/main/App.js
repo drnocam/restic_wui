@@ -46,6 +46,10 @@ export function ReadWriteSettings() {
   return window['go']['main']['App']['ReadWriteSettings']();
 }
 
+export function RestoreFilesInSnapshots(arg1, arg2, arg3) {
+  return window['go']['main']['App']['RestoreFilesInSnapshots'](arg1, arg2, arg3);
+}
+
 export function RestoreRepo(arg1, arg2) {
   return window['go']['main']['App']['RestoreRepo'](arg1, arg2);
 }

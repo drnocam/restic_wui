@@ -9,14 +9,15 @@
     ModalFooter,
     ModalHeader
   } from 'sveltestrap';  
-    import { ListFilesInSnapshots,RestoreRepo } from "/wailsjs/go/main/App";
+    import { ListFilesInSnapshots,RestoreRepo,RestoreFilesInSnapshots } from "/wailsjs/go/main/App";
     import { selected_repo_id  } from '/src/store.js';
-    import { myfetch_json ,formatBytes, warning_notify } from "/src/myfuncs";   
+    import { myfetch_json ,formatBytes, warning_notify,htmlEntities } from "/src/myfuncs";   
 
 
 /* == Variables == */
     let modal_info = "";
     let modal_open = false;
+    let modal_open_sm = false;
     let snapshot_files_list = []
     let cb_form ;
     export let snapshot_info = {'id':null};
@@ -24,7 +25,7 @@
     const restore_snapshot = () => {
         myfetch_json(RestoreRepo, $selected_repo_id,snapshot_info.id ).then(r=>{
             if(r){
-                toggleModal()
+                toggleModalSm()
                 modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>") 
 
             }            
@@ -43,13 +44,16 @@
     }
 
 const toggleModal = () => {
+    modal_open = !modal_open;
+}
+const toggleModalSm = () => {
     /* 
     * if modal is open then it will be closed so reset modal_info;
     */
-    if(modal_open ) {
+    if(modal_open_sm ) {
         modal_info = "";
     }
-    modal_open = !modal_open;
+    modal_open_sm = !modal_open_sm;
 
 }
 
@@ -63,10 +67,22 @@ const extract_files = () => {
         warning_notify("Please Select Items First")
         return;
       }
+      let values = Array()
       for (let i = 0; i < el.length; i++) {
         if(cb_form.elements[i].checked)
-          console.log(cb_form.elements[i].value)
-    }
+          values.push(cb_form.elements[i].value)
+    } 
+    if(values.length>0) {
+        myfetch_json(RestoreFilesInSnapshots, $selected_repo_id,snapshot_info.id,JSON.stringify(values) ).then(r=>{
+          toggleModalSm()
+          modal_info =  String(r).replace(/(?:\r\n|\r|\n)/g,"<br>")        
+          modal_info =  htmlEntities(modal_info)        
+        })
+        
+      }
+
+
+
 }
 
 
@@ -76,6 +92,11 @@ const extract_files = () => {
 <style>
     /* your styles go here */
 </style>
+<Modal isOpen={modal_open_sm} toggle={toggleModalSm} >
+  <ModalBody>
+      {@html modal_info}
+  </ModalBody>
+</Modal>
 {#if snapshot_info.id!=0}
 <div class="btn btn-primary" on:click={()=>{
     restore_snapshot()

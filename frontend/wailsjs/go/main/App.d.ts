@@ -23,6 +23,8 @@ export function ListFilesInSnapshots(arg1:number,arg2:string):Promise<string>;
 
 export function ReadWriteSettings():Promise<void>;
 
+export function RestoreFilesInSnapshots(arg1:number,arg2:string,arg3:string):Promise<string>;
+
 export function RestoreRepo(arg1:number,arg2:string):Promise<string>;
 
 export function SearchInRepo(arg1:number,arg2:string):Promise<string>;

@@ -154,9 +154,7 @@ TODO: delete from disk
 <div class="btn btn-primary">Backup</div>
 <div class="btn btn-primary" on:click={check_backup}>Check Backup....</div>
 <div class="btn btn-primary">Show Difference</div>
-<div class="btn btn-primary">Forget</div>
-<div class="btn btn-primary">List In Snapshot</div>
-<div class="btn btn-primary">Find In Snapshot</div>
+<div class="btn btn-primary">Forget</div> 
 <div class="btn btn-primary" on:click={get_stats}>Stats</div>
 <div class="btn btn-primary">Unlock</div>
 <div class="btn btn-primary">Tag</div>

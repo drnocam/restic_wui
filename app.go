@@ -306,7 +306,7 @@ func (a *App) RestoreRepo(id int, snapshot_id string) string {
 			return fmt.Sprint(JsonReturn(Message{0, "Directory couldnt opened!"}, "{\"error\":1}"))
 		}
 
-		cmd := exec.Command("restic", "-r", selected_repository.Path, "restore", snapshot_id, "--target", target_dir)
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "restore", snapshot_id, "--target", fmt.Sprintf("%q", target_dir))
 
 		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
 		cmd.Env = newEnv
@@ -337,6 +337,46 @@ func (a *App) ListFilesInSnapshots(id int, snapshot_id string) string {
 		}
 		add_comma := strings.Replace(string(out), "}\n{", "},{", -1)
 		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("[%s]", add_comma)))
+	}
+	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+}
+
+func (a *App) RestoreFilesInSnapshots(id int, snapshot_id string, files_json string) string {
+
+	settings_index := settings.FindIndexById(id)
+
+	if settings_index != -1 {
+
+		selected_repository := &settings.Repositories[settings_index]
+
+		//files := [string]
+		var arr []string
+		_ = json.Unmarshal([]byte(files_json), &arr)
+
+		cwd, _ := os.Getwd()
+		target_dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+			Title:            "Choose Directory To Restore",
+			DefaultDirectory: cwd,
+		})
+		if err != nil {
+			return fmt.Sprint(JsonReturn(Message{0, "Directory couldnt opened!"}, "{\"error\":1}"))
+		}
+
+		cmd := exec.Command("restic", "-r", selected_repository.Path, "restore", snapshot_id, "--target", target_dir, "--json")
+		for i := 0; i < len(arr); i++ {
+			cmd.Args = append(cmd.Args, "--include")
+			cmd.Args = append(cmd.Args, arr[i])
+		}
+		// fmt.Println(cmd.String())
+		// fmt.Printf("%v", cmd.Args)
+		newEnv := append(os.Environ(), "RESTIC_PASSWORD="+selected_repository.Password)
+		cmd.Env = newEnv
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
+		}
+		return fmt.Sprint(JsonReturn(Message{-1, ""}, fmt.Sprintf("%q", string(out))))
 	}
 	return fmt.Sprint(JsonReturn(Message{0, "Error occured. No repository found!"}, "{\"error\":1}"))
 }
