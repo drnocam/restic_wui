@@ -43,7 +43,7 @@
             dark_mode.set(0)
         }
     }
-    function get_snapshots() :void {
+    function get_snapshots() {
 
           myfetch_json(GetSnapshots,$selected_repo_id).then(r=>{
             if("error" in r) {

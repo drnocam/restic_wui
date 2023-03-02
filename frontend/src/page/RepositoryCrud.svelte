@@ -157,7 +157,6 @@ TODO: delete from disk
 <div class="btn btn-primary">Forget</div> 
 <div class="btn btn-primary" on:click={get_stats}>Stats</div>
 <div class="btn btn-primary">Unlock</div>
-<div class="btn btn-primary">Tag</div>
 <Modal isOpen={repo_add_modal} toggle={repo_toggle} size="lg">
     <ModalHeader {repo_toggle}>
       {#if islem == 0}

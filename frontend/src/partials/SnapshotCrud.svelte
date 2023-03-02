@@ -43,6 +43,24 @@
       )
     }
 
+    const get_tag_snapshot = () => {
+        myfetch_json(ListFilesInSnapshots, $selected_repo_id,snapshot_info.id ).then(r=>{
+            if(r){
+                console.log(r);
+            }            
+        }
+      )
+    }
+
+    const set_tag_snapshot = () => {
+        myfetch_json(ListFilesInSnapshots, $selected_repo_id,snapshot_info.id ).then(r=>{
+            if(r){
+                console.log(r);
+            }            
+        }
+      )
+    }
+
 const toggleModal = () => {
     modal_open = !modal_open;
 }
@@ -100,14 +118,17 @@ const extract_files = () => {
 {#if snapshot_info.id!=0}
 <div class="btn btn-primary" on:click={()=>{
     restore_snapshot()
-}}>Restore Snapshot Id:
-    <span class="">{snapshot_info["short_id"]}</span> 
+}}>Restore Snapshot 
     </div>
 <div class="btn btn-primary" on:click={()=>{
     list_files_in_snapshot()
-}}>List Files In Snapshot Id:
-    <span class="">{snapshot_info["short_id"]}</span> 
+}}>List Files In Snapshot 
     </div>
+    <div class="btn btn-primary" on:click={()=>{
+      set_tag_snapshot()
+  }}>Tag Snapshot 
+      </div>
+ 
 {#each Object.keys(snapshot_info) as sp}
     <div><strong>{sp}</strong> : {snapshot_info[sp]}</div>
       {/each}

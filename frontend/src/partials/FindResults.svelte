@@ -90,7 +90,14 @@ TODO: dont repeat to ask folder, so go should handle
   </ModalBody>
 </Modal>
 <div class="input-group mb-3">
-    <input bind:value={search_value} type="text" class="form-control" placeholder="You may find by * symbols" aria-describedby="search-button">
+    <input bind:value={search_value} type="text" class="form-control" 
+    placeholder="You may search by * symbols" aria-describedby="search-button"
+    on:keyup={(e)=>{
+if( e.key === "Enter" ) {
+  search_in() 
+}
+    }}
+    >
     <button class="btn btn-outline-primary" id="search-button" on:click={search_in}>Search</button>
   </div>
 
