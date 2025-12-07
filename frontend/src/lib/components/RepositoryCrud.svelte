@@ -87,9 +87,11 @@
                 modal_info =
                     "<strong>Snapshots Count</strong>: " +
                     r["snapshots_count"] +
-                    "<br><strong>Total File</strong>: " +
+                    "<br><strong>Total Files</strong>: " +
                     r["total_file_count"] +
-                    "<br><strong>Total Size</strong>: " +
+                    "<br><strong>Disk Size</strong>: " +
+                    formatBytes(r["disk_size"]) +
+                    "<br><strong>Logical Size</strong>: " +
                     formatBytes(r["total_size"]);
             }
         });

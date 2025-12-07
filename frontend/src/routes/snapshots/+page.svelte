@@ -9,8 +9,12 @@
     let selectedSnapshot: Snapshot | null = null;
     let showRestoreModal = false;
     let showFilesModal = false;
-    let snapshotFiles: string[] = [];
+    let snapshotFiles: any[] = [];
     let restoreTargetDir = "";
+
+    // Pagination
+    let currentPage = 1;
+    let itemsPerPage = 10;
 
     $: filteredSnapshots = $snapshots.filter(
         (s) =>
@@ -18,6 +22,44 @@
             s.paths.some((p) => p.includes(searchTerm)) ||
             s.tags?.some((t) => t.includes(searchTerm)),
     );
+
+    $: totalPages = Math.ceil(filteredSnapshots.length / itemsPerPage);
+    $: paginatedSnapshots = filteredSnapshots.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+    );
+
+    // Reset page when search changes
+    $: if (searchTerm) {
+        currentPage = 1;
+    }
+
+    function formatRelativeTime(dateStr: string): string {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMins = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+
+        if (diffYears > 0)
+            return `${diffYears} year${diffYears > 1 ? "s" : ""} ago`;
+        if (diffMonths > 0)
+            return `${diffMonths} month${diffMonths > 1 ? "s" : ""} ago`;
+        if (diffWeeks > 0)
+            return `${diffWeeks} week${diffWeeks > 1 ? "s" : ""} ago`;
+        if (diffDays > 0)
+            return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+        if (diffHours > 0)
+            return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+        if (diffMins > 0)
+            return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
+        return "Just now";
+    }
 
     async function loadSnapshots() {
         loading.set(true);
@@ -93,7 +135,12 @@
 
         loading.set(true);
         try {
-            await api.restoreSnapshot(selectedSnapshot.id, restoreTargetDir);
+            await api.restoreSnapshot(
+                selectedSnapshot.id,
+                restoreTargetDir,
+                [],
+                "",
+            );
             toast.push("Snapshot restored successfully", {
                 theme: {
                     "--toastBackground": "#4ADE80",
@@ -121,20 +168,8 @@
         loading.set(true);
         try {
             const data = await api.listSnapshotFiles(snapshot.id);
-            // Parse the output which is a stream of JSON objects
-            // Each line is a JSON object
-            const lines = data.trim().split("\n");
-            snapshotFiles = lines
-                .map((line) => {
-                    try {
-                        const obj = JSON.parse(line);
-                        return obj.path; // Assuming 'path' is the field we want
-                    } catch (e) {
-                        return null;
-                    }
-                })
-                .filter(Boolean) as string[];
-
+            // Now data is already an array of LSNode objects
+            snapshotFiles = data || [];
             showFilesModal = true;
         } catch (e) {
             toast.push("Failed to load snapshot files", {
@@ -149,6 +184,46 @@
         }
     }
 
+    function formatBytes(bytes: number): string {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
+    async function handleRestoreFile(filePath: string) {
+        if (!selectedSnapshot) return;
+        try {
+            const targetDir = await api.selectDirectory();
+            if (targetDir) {
+                loading.set(true);
+                await api.restoreSnapshot(
+                    selectedSnapshot.id,
+                    targetDir,
+                    [filePath],
+                    "",
+                );
+                toast.push("File restored successfully to " + targetDir, {
+                    theme: {
+                        "--toastBackground": "#4ADE80",
+                        "--toastColor": "black",
+                    },
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            toast.push("Restore failed: " + e, {
+                theme: {
+                    "--toastBackground": "#F87171",
+                    "--toastColor": "white",
+                },
+            });
+        } finally {
+            loading.set(false);
+        }
+    }
+
     function openRestoreModal(snapshot: Snapshot) {
         selectedSnapshot = snapshot;
         showRestoreModal = true;
@@ -158,6 +233,12 @@
         showFilesModal = false;
         snapshotFiles = [];
         selectedSnapshot = null;
+    }
+
+    function goToPage(page: number) {
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+        }
     }
 
     onMount(() => {
@@ -191,6 +272,16 @@
                     />
                 </svg>
             </div>
+            <select
+                bind:value={itemsPerPage}
+                on:change={() => (currentPage = 1)}
+                class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+            </select>
             <button
                 class="p-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 text-slate-300 transition-colors"
                 on:click={loadSnapshots}
@@ -227,118 +318,255 @@
             <p class="text-slate-400">No snapshots found.</p>
         </div>
     {:else}
-        <div class="grid gap-4">
-            {#each filteredSnapshots as snapshot}
-                <div
-                    class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:border-slate-600 transition-colors group"
-                >
-                    <div class="flex items-start justify-between">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-3">
+        <!-- Table View -->
+        <div
+            class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-x-auto"
+        >
+            <table class="w-full min-w-[1000px]">
+                <thead class="bg-slate-800 border-b border-slate-700">
+                    <tr>
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >ID</th
+                        >
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >Time</th
+                        >
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >Paths</th
+                        >
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >Host</th
+                        >
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >Size</th
+                        >
+                        <th
+                            class="text-left text-sm font-medium text-slate-400 px-4 py-3"
+                            >Tags</th
+                        >
+                        <th
+                            class="text-right text-sm font-medium text-slate-400 px-4 py-3"
+                            >Actions</th
+                        >
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each paginatedSnapshots as snapshot, i}
+                        <tr
+                            class="border-b border-slate-700/50 hover:bg-slate-800/50 transition-colors"
+                        >
+                            <td class="px-4 py-3">
                                 <span
                                     class="font-mono text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded text-sm"
-                                    >{snapshot.short_id}</span
                                 >
-                                <span class="text-slate-300 text-sm"
-                                    >{new Date(
-                                        snapshot.time,
-                                    ).toLocaleString()}</span
-                                >
-                            </div>
-                            <div class="flex flex-wrap gap-2 mt-2">
-                                {#each snapshot.paths as path}
-                                    <span
-                                        class="text-slate-400 text-sm bg-slate-800 px-2 py-0.5 rounded border border-slate-700/50"
-                                        >{path}</span
+                                    {snapshot.short_id}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-col">
+                                    <span class="text-white text-sm"
+                                        >{formatRelativeTime(
+                                            snapshot.time,
+                                        )}</span
                                     >
-                                {/each}
-                            </div>
-                            {#if snapshot.tags}
-                                <div class="flex gap-2 mt-2">
-                                    {#each snapshot.tags as tag}
-                                        <span
-                                            class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-full"
-                                            >#{tag}</span
-                                        >
-                                    {/each}
+                                    <span class="text-slate-500 text-xs"
+                                        >{new Date(
+                                            snapshot.time,
+                                        ).toLocaleString()}</span
+                                    >
                                 </div>
-                            {/if}
-                        </div>
-
-                        <div
-                            class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <button
-                                class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
-                                title="View Files"
-                                on:click={() => loadSnapshotFiles(snapshot)}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap gap-1">
+                                    {#each snapshot.paths.slice(0, 2) as path}
+                                        <span
+                                            class="text-slate-300 text-sm bg-slate-800 px-2 py-0.5 rounded border border-slate-700/50 truncate max-w-[200px]"
+                                            title={path}
+                                        >
+                                            {path}
+                                        </span>
+                                    {/each}
+                                    {#if snapshot.paths.length > 2}
+                                        <span class="text-slate-400 text-sm"
+                                            >+{snapshot.paths.length - 2}</span
+                                        >
+                                    {/if}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-slate-300 text-sm"
+                                    >{snapshot.hostname || "-"}</span
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
-                                title="Restore"
-                                on:click={() => openRestoreModal(snapshot)}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-slate-300 text-sm">
+                                    {#if snapshot.summary?.total_bytes_processed}
+                                        {formatBytes(
+                                            snapshot.summary
+                                                .total_bytes_processed,
+                                        )}
+                                    {:else}
+                                        -
+                                    {/if}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex gap-1 flex-wrap">
+                                    {#if snapshot.tags && snapshot.tags.length > 0}
+                                        {#each snapshot.tags.slice(0, 2) as tag}
+                                            <span
+                                                class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-full"
+                                            >
+                                                #{tag}
+                                            </span>
+                                        {/each}
+                                        {#if snapshot.tags.length > 2}
+                                            <span class="text-slate-400 text-xs"
+                                                >+{snapshot.tags.length -
+                                                    2}</span
+                                            >
+                                        {/if}
+                                    {:else}
+                                        <span class="text-slate-500 text-sm"
+                                            >-</span
+                                        >
+                                    {/if}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div
+                                    class="flex items-center justify-end gap-1"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                class="p-2 hover:bg-red-900/30 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
-                                title="Delete"
-                                on:click={() => handleForget(snapshot.id)}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            {/each}
+                                    <button
+                                        class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                        title="View Files"
+                                        on:click={() =>
+                                            loadSnapshotFiles(snapshot)}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                        title="Restore"
+                                        on:click={() =>
+                                            openRestoreModal(snapshot)}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        class="p-2 hover:bg-red-900/30 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                                        title="Delete"
+                                        on:click={() =>
+                                            handleForget(snapshot.id)}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-4 w-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
         </div>
+
+        <!-- Pagination Controls -->
+        {#if totalPages > 1}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-400">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(
+                        currentPage * itemsPerPage,
+                        filteredSnapshots.length,
+                    )} of {filteredSnapshots.length} snapshots
+                </span>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {currentPage ===
+                        1
+                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}"
+                        on:click={() => goToPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    {#each Array(totalPages) as _, i}
+                        {#if i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
+                            <button
+                                class="w-8 h-8 rounded-lg text-sm font-medium transition-colors {currentPage ===
+                                i + 1
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}"
+                                on:click={() => goToPage(i + 1)}
+                            >
+                                {i + 1}
+                            </button>
+                        {:else if i + 1 === currentPage - 2 || i + 1 === currentPage + 2}
+                            <span class="text-slate-500">...</span>
+                        {/if}
+                    {/each}
+                    <button
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {currentPage ===
+                        totalPages
+                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}"
+                        on:click={() => goToPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
+        {/if}
     {/if}
 </div>
 
@@ -454,15 +682,87 @@
                         No files found or empty snapshot.
                     </p>
                 {:else}
-                    <ul class="space-y-1">
+                    <div class="space-y-1">
                         {#each snapshotFiles as file}
-                            <li
-                                class="text-slate-300 hover:text-white hover:bg-slate-800/50 px-2 py-0.5 rounded cursor-default break-all"
+                            <div
+                                class="flex items-center justify-between px-3 py-2 hover:bg-slate-800/50 rounded-lg gap-4"
                             >
-                                {file}
-                            </li>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        {#if file.type === "dir"}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-4 w-4 text-yellow-400 flex-shrink-0"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                                                />
+                                            </svg>
+                                        {:else}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-4 w-4 text-slate-400 flex-shrink-0"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                        {/if}
+                                        <span
+                                            class="text-white text-sm truncate"
+                                            title={file.path}>{file.path}</span
+                                        >
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-4 mt-1 text-xs text-slate-500 ml-6"
+                                    >
+                                        {#if file.size}
+                                            <span>{formatBytes(file.size)}</span
+                                            >
+                                        {/if}
+                                        {#if file.permissions}
+                                            <span>{file.permissions}</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <button
+                                    class="px-3 py-1.5 rounded-lg bg-green-600/20 text-green-400 hover:bg-green-600 hover:text-white transition-colors text-sm flex items-center gap-1.5 flex-shrink-0"
+                                    on:click={() =>
+                                        handleRestoreFile(file.path)}
+                                    disabled={$loading}
+                                    title="Restore this file"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                                        />
+                                    </svg>
+                                    Restore
+                                </button>
+                            </div>
                         {/each}
-                    </ul>
+                    </div>
                 {/if}
             </div>
         </div>

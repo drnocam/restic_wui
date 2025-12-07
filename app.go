@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"restic_wui/internal/config"
 	"restic_wui/internal/controller"
 	"restic_wui/internal/restic"
 
@@ -14,15 +15,24 @@ type App struct {
 	ctx                context.Context
 	repoController     *controller.RepoController
 	snapshotController *controller.SnapshotController
+	config             *config.Config
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	repoCtrl := controller.NewRepoController()
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Printf("Failed to load config: %v\n", err)
+		// Fallback to default config if load fails
+		cfg = &config.Config{ResticCommand: "restic"}
+	}
+
+	repoCtrl := controller.NewRepoController(cfg)
 	snapshotCtrl := controller.NewSnapshotController(repoCtrl)
 	return &App{
 		repoController:     repoCtrl,
 		snapshotController: snapshotCtrl,
+		config:             cfg,
 	}
 }
 
@@ -62,6 +72,46 @@ func (a *App) PruneRepository() error {
 	return err
 }
 
+func (a *App) CloseRepository() {
+	a.repoController.CloseRepository()
+}
+
+func (a *App) DeleteRepository() error {
+	return a.repoController.DeleteRepository()
+}
+
+func (a *App) Backup(source string, excludes []string) (string, error) {
+	return a.repoController.Backup(source, excludes)
+}
+
+func (a *App) RepairRepository() (string, error) {
+	return a.repoController.RepairRepository()
+}
+
+func (a *App) CheckRepository() (string, error) {
+	return a.repoController.CheckRepository()
+}
+
+func (a *App) UnlockRepository() error {
+	return a.repoController.UnlockRepository()
+}
+
+func (a *App) Find(pattern string) ([]restic.FindResult, error) {
+	return a.repoController.Find(pattern)
+}
+
+func (a *App) MountRepository(mountPoint string) error {
+	return a.repoController.MountRepository(mountPoint)
+}
+
+func (a *App) UnmountRepository() error {
+	return a.repoController.UnmountRepository()
+}
+
+func (a *App) IsMounted() bool {
+	return a.repoController.IsMounted()
+}
+
 // Snapshot Methods
 
 func (a *App) ListSnapshots() ([]restic.Snapshot, error) {
@@ -72,11 +122,11 @@ func (a *App) ForgetSnapshot(id string, prune bool) error {
 	return a.snapshotController.ForgetSnapshot(id, prune)
 }
 
-func (a *App) RestoreSnapshot(id, targetDir string) error {
-	return a.snapshotController.RestoreSnapshot(id, targetDir)
+func (a *App) RestoreSnapshot(id, targetDir string, paths []string, host string) (*restic.RestoreMessage, error) {
+	return a.snapshotController.RestoreSnapshot(id, targetDir, paths, host)
 }
 
-func (a *App) ListSnapshotFiles(id string) (string, error) {
+func (a *App) ListSnapshotFiles(id string) ([]restic.LSNode, error) {
 	return a.snapshotController.ListSnapshotFiles(id)
 }
 
@@ -90,4 +140,19 @@ func (a *App) SelectDirectory() (string, error) {
 		return "", fmt.Errorf("failed to open directory dialog: %w", err)
 	}
 	return selection, nil
+}
+
+// Settings Methods
+
+func (a *App) GetSettings() (*config.Config, error) {
+	return a.config, nil
+}
+
+func (a *App) SaveSettings(cfg config.Config) error {
+	a.config.ResticCommand = cfg.ResticCommand
+	// Update wrapper command if repo is open (optional, but good practice)
+	if a.repoController.Wrapper != nil {
+		a.repoController.Wrapper.Command = cfg.ResticCommand
+	}
+	return config.Save(a.config)
 }

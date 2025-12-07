@@ -2,7 +2,10 @@ module restic_wui
 
 go 1.24.0
 
-require github.com/wailsapp/wails/v2 v2.10.2
+require (
+	github.com/wailsapp/wails/v2 v2.10.2
+	gopkg.in/ini.v1 v1.67.0
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
